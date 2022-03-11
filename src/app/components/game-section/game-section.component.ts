@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject, interval, timer } from 'rxjs';
-import { scan, takeWhile, tap, finalize } from 'rxjs/operators';
+import { scan, takeWhile, tap, finalize, map } from 'rxjs/operators';
+import { MathProblem } from 'src/app/interfaces/math-problem';
 
 @Component({
   selector: 'app-game-section',
@@ -8,97 +9,86 @@ import { scan, takeWhile, tap, finalize } from 'rxjs/operators';
   styleUrls: ['./game-section.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GameSectionComponent implements OnInit {
+export class GameSectionComponent {
 
-  numbers!: MathProblem;
+  currentProblem!: MathProblem;
 
-  previousProblems: MathProblem[] | any = [];
+  previousProblems: MathProblem[] = [];
 
   model: any = null;
 
-  timerInterval$ = interval(1000);
-  time = 30;
-  gameStart = false
-  gameInProgress$: any;
+  totalTime = 30;
 
+  /**
+   * subject that notifies when the game is in progress
+   */
+  gameInProgress$: any = new BehaviorSubject(false)
+    .pipe(tap(flag => flag && this.resetGame()));
+
+  /**
+   * timer for the game to run, when time runs out then game is over
+   */
   timer$ = timer(0, 1000)
     .pipe(
-      tap(val => console.log('before',{val,})),
-      scan((acc, curr) => {console.log({acc, curr}); return --acc}, this.time + 1),
-      tap(val => console.log('after',{val,})),
-      takeWhile((x) => x >= 0),
+      map(currentTime => this.totalTime - currentTime),
+      takeWhile((counter) => counter > 0),
       finalize(() => this.gameInProgress$.next(false))
     )
 
-  countDown$: any;
+  /**
+   * generates all the numbers needed to create a math problem
+   */
+  private createCurrentProblem() {
 
-  ngOnInit(): void {
-    this.createNumbers();
+    const firstNumber = this.randomNumber(1,10);
+    const secondNumber = this.randomNumber(1,10);
+    const answer = firstNumber + secondNumber;
 
-    this.gameInProgress$ = new BehaviorSubject(false)
-      .pipe(
-        tap(t => console.log('in progress', t)),
-        tap(t => {
-          if(t) {
-            this.model = null;
-          // this.numbers = {first: null, second: null, answer: null};
-          this.previousProblems = [];
-          }
-        })
-      );
-
+    this.currentProblem = { firstNumber, secondNumber, answer }
   }
 
-  createNumbers() {
-    const first = this.randomNum10();
-    const second = this.randomNum10();
-
-    this.numbers = {
-      first,
-      second,
-      answer: first + second,
-    }
-  }
-
+  /**
+   * generates a random number between the min-max range, inclusive
+   * @param min min number that can be created
+   * @param max max number that can be created
+   * @returns a rounded number in the range of the min and max, inclusive
+   */
   private randomNumber(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
+    const minRound = Math.ceil(min);
+    const maxRound = Math.floor(max);
 
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(Math.random() * (maxRound - minRound + 1)) + minRound;
   }
 
-  checkAnswer() {
-    const isAnswerCorrect = this.model === this.numbers.answer;
-    console.log("answers",this.model, this.numbers.answer)
-    this.nextProblem()
-  }
-
-  nextProblem() {
-    this.previousProblems.push({...this.numbers, correct: this.model === this.numbers.answer});
-
-    console.log('previous',this.previousProblems)
+  /**
+   * resets the previous problems array and model to null
+   * and generates new problem
+   */
+  private resetGame() {
+    this.createCurrentProblem();
     this.model = null;
-    this.createNumbers();
+    this.previousProblems = [];
   }
 
-  randomNum10() {
-    return this.randomNumber(1,10)
+  /**
+   * checks to see if answer is correct, saves result onto current answer,
+   * pushes current problem into past problems array,
+   * wipes model, and creates a new problem
+   */
+   nextProblem() {
+    const isCorrectAnswer = this.model === this.currentProblem.answer;
+    const currentProblem = {...this.currentProblem, isCorrectAnswer}
+    this.previousProblems.push(currentProblem);
+
+    this.model = null;
+    this.createCurrentProblem();
   }
 
-  randomNum20() {
-    return this.randomNumber(1,20)
-  }
-
+  /**
+   * starts the game
+   */
   startGame() {
     this.gameInProgress$.next(true)
   }
 
 }
-
-interface MathProblem {
-  first: number,
-  second: number,
-  answer: number,
-  correct?: boolean,
-}
-

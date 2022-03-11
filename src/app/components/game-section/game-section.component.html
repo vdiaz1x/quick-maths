@@ -1,17 +1,29 @@
-<button *ngIf="!(gameInProgress$ | async)" (click)="startGame()">start</button>
+<button *ngIf="!(gameInProgress$ | async)"
+  (click)="startGame()">
+  start
+</button>
 
 <div *ngIf="gameInProgress$ | async">
-  <div>timer: {{ (timer$ | async | number) }}</div>
+
   <div>
-    {{numbers?.first}} + {{numbers?.second}} =
+    timer: {{ (timer$ | async | number) }}
+  </div>
+
+  <div>
+    <span>{{ currentProblem?.firstNumber }}</span>
+    <span> + </span>
+    <span>{{ currentProblem?.secondNumber }}</span>
+    <span> = </span>
     <input type="number" [(ngModel)]="model">
-    <button *ngIf="model" (click)="checkAnswer()">check answer</button>
+
+    <button *ngIf="model" (click)="nextProblem()">check answer</button>
   </div>
 
 </div>
 
 <div [style.border]="'1px solid white'">
-  <div *ngFor="let problem of previousProblems" [style.background]="problem?.correct ? 'green' : 'red'">
-    {{ problem?.first }} + {{ problem?.second }} = {{ problem?.answer }}
+  <div *ngFor="let problem of previousProblems"
+    [style.background]="problem?.isCorrectAnswer ? 'green' : 'red'">
+    {{ problem?.firstNumber }} + {{ problem?.secondNumber }} = {{ problem?.answer }}
   </div>
 </div>
