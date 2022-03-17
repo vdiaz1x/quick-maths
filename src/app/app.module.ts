@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { AppComponent } from './app.component';
 import { GameSectionComponent } from './components/game-section/game-section.component';
@@ -12,7 +12,7 @@ import { GameSectionComponent } from './components/game-section/game-section.com
   ],
   imports: [
     BrowserModule,
-    FormsModule,
+    FontAwesomeModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

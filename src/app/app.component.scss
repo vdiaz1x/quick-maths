@@ -1,7 +1,14 @@
 .header, .footer {
   height: 10vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
 }
 
 .game {
   height: 80vh;
+  width: 60vw;
+  padding: 20px 0;
+  margin: auto;
 }

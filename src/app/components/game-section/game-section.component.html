@@ -1,29 +1,87 @@
-<button *ngIf="!(gameInProgress$ | async)"
-  (click)="startGame()">
-  start
-</button>
+<section *ngIf="!(gameInProgress$ | async)">
+
+  <button class="start-button"
+    (click)="startGame()">
+    start
+  </button>
+
+  <div class="rules-container">
+    <h3 class="rules-title">rules</h3>
+    <p class="rules-item">answer the math problem by typing the answer with the touchpad</p>
+    <p class="rules-item">you have 30 seconds to answer as many problems as you can</p>
+    <p class="rules-item">press the start button to begin!</p>
+  </div>
+</section>
 
 <div *ngIf="gameInProgress$ | async">
 
-  <div>
-    timer: {{ (timer$ | async | number) }}
+  <div class="timer-container" *ngIf="(timer$ | async) as countdown">
+    <span class="timer-label">timer:</span>
+    <span class="timer-countdown"
+      [class.warning]="countdown <= 15"
+      [class.error]="countdown <= 5">
+      {{ countdown }}
+    </span>
   </div>
 
-  <div>
-    <span>{{ currentProblem?.firstNumber }}</span>
-    <span> + </span>
-    <span>{{ currentProblem?.secondNumber }}</span>
-    <span> = </span>
-    <input type="number" [(ngModel)]="model">
+  <div class="current-problem-container">
+    <span class="current-problem-section">{{ currentProblem?.firstNumber }}</span>
+    <span class="current-problem-section"> + </span>
+    <span class="current-problem-section">{{ currentProblem?.secondNumber }}</span>
+    <span class="current-problem-section"> = </span>
+    <span class="current-problem-section">{{ num }}</span>
+  </div>
 
-    <button *ngIf="model" (click)="nextProblem()">check answer</button>
+  <div class="keypad-container">
+
+    <button *ngFor="let number of numPad"
+      (click)="type(number.value)"
+      class="keypad-key">
+      {{ number.value }}
+    </button>
+
+    <button (click)="backspace()"
+      class="keypad-key">
+      <!-- backspace -->
+      <fa-icon [icon]="icons.backspace"></fa-icon>
+    </button>
+
+    <button (click)="clear()"
+      class="keypad-key">
+      <!-- clear -->
+      <fa-icon [icon]="icons.clear"></fa-icon>
+    </button>
+
+    <button (click)="nextProblem()"
+      class="keypad-key">
+      <!-- enter -->
+      <fa-icon [icon]="icons.enter"></fa-icon>
+    </button>
+
   </div>
 
 </div>
 
-<div [style.border]="'1px solid white'">
+<!-- <div *ngIf="previousProblems?.length"
+  class="previous-problem-container">
   <div *ngFor="let problem of previousProblems"
-    [style.background]="problem?.isCorrectAnswer ? 'green' : 'red'">
-    {{ problem?.firstNumber }} + {{ problem?.secondNumber }} = {{ problem?.answer }}
+    class="previous-problem-item"
+    [class.correct]="problem?.isCorrectAnswer"
+    [class.incorrect]="!problem?.isCorrectAnswer">
+    <span class="previous-problem-section">{{ problem?.firstNumber }}</span>
+    <span class="previous-problem-section"> + </span>
+    <span class="previous-problem-section">{{ problem?.secondNumber }}</span>
+    <span class="previous-problem-section"> = </span>
+    <span class="previous-problem-section" *ngIf="!problem?.isCorrectAnswer"><s>{{ problem?.givenAnswer }}</s></span>
+    <span class="previous-problem-section"> {{ problem?.answer }}</span>
+  </div>
+</div> -->
+
+<div *ngIf="previousProblems?.length"
+  class="previous-problem-container">
+  <div *ngFor="let problem of previousProblems"
+    class="previous-problem-square"
+    [class.correct]="problem?.isCorrectAnswer"
+    [class.incorrect]="!problem?.isCorrectAnswer">
   </div>
 </div>

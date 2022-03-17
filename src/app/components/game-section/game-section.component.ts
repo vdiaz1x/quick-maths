@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { BehaviorSubject, interval, timer } from 'rxjs';
-import { scan, takeWhile, tap, finalize, map } from 'rxjs/operators';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { BehaviorSubject, timer } from 'rxjs';
+import { takeWhile, tap, finalize, map } from 'rxjs/operators';
 import { MathProblem } from 'src/app/interfaces/math-problem';
+import { faDeleteLeft, faCircleCheck, faRectangleXmark } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-game-section',
@@ -15,15 +16,54 @@ export class GameSectionComponent {
 
   previousProblems: MathProblem[] = [];
 
-  model: any = null;
+  totalTime = 300;
 
-  totalTime = 30;
+  num: string = '';
+
+  numPad = [
+    {
+      value: 0
+    },
+    {
+      value: 1
+    },
+    {
+      value: 2
+    },
+    {
+      value: 3
+    },
+    {
+      value: 4
+    },
+    {
+      value: 5
+    },
+    {
+      value: 6
+    },
+    {
+      value: 7
+    },
+    {
+      value: 8
+    },
+    {
+      value: 9
+    },
+  ]
+
+  icons = {
+    backspace: faDeleteLeft,
+    clear: faRectangleXmark,
+    enter: faCircleCheck,
+  }
 
   /**
    * subject that notifies when the game is in progress
    */
   gameInProgress$: any = new BehaviorSubject(false)
-    .pipe(tap(flag => flag && this.resetGame()));
+    .pipe(tap(t => console.log('in progress?', t)),tap(flag => flag && this.resetGame()));
 
   /**
    * timer for the game to run, when time runs out then game is over
@@ -66,7 +106,7 @@ export class GameSectionComponent {
    */
   private resetGame() {
     this.createCurrentProblem();
-    this.model = null;
+    this.num = '';
     this.previousProblems = [];
   }
 
@@ -76,11 +116,13 @@ export class GameSectionComponent {
    * wipes model, and creates a new problem
    */
    nextProblem() {
-    const isCorrectAnswer = this.model === this.currentProblem.answer;
-    const currentProblem = {...this.currentProblem, isCorrectAnswer}
+    const givenAnswer = +this.num;
+    const isCorrectAnswer = givenAnswer === this.currentProblem.answer;
+    const currentProblem = {...this.currentProblem, isCorrectAnswer, givenAnswer}
     this.previousProblems.push(currentProblem);
+    console.log(this.previousProblems)
 
-    this.model = null;
+    this.num = '';
     this.createCurrentProblem();
   }
 
@@ -89,6 +131,21 @@ export class GameSectionComponent {
    */
   startGame() {
     this.gameInProgress$.next(true)
+  }
+
+  type(num: number) {
+    console.log(num)
+    this.num = this.num ? this.num + `${num}` : `${num}`
+  }
+
+  backspace() {
+    // const newnum = this.num
+    this.num = this.num.slice(0,this.num.length - 1);
+    console.log(this.num)
+  }
+
+  clear() {
+    this.num = '';
   }
 
 }
