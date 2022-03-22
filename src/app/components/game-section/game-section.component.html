@@ -11,26 +11,32 @@
     <p class="rules-item">you have 30 seconds to answer as many problems as you can</p>
     <p class="rules-item">press the start button to begin!</p>
   </div>
+
 </section>
 
 <div *ngIf="gameInProgress$ | async">
 
-  <div class="timer-container" *ngIf="(timer$ | async) as countdown">
-    <span class="timer-label">timer:</span>
-    <span class="timer-countdown"
-      [class.warning]="countdown <= 15"
-      [class.error]="countdown <= 5">
-      {{ countdown }}
-    </span>
+  <div class="top-section-container">
+
+    <div class="current-problem-container">
+      <span class="current-problem-section">{{ currentProblem?.firstNumber }}</span>
+      <span class="current-problem-section"> + </span>
+      <span class="current-problem-section">{{ currentProblem?.secondNumber }}</span>
+      <span class="current-problem-section"> = </span>
+      <span class="current-problem-section">{{ num }}</span>
+    </div>
+
+    <div class="timer-container" *ngIf="(timer$ | async) as countdown">
+      <span class="timer-label">timer:</span>
+      <span class="timer-countdown"
+        [class.warning]="countdown <= 15"
+        [class.error]="countdown <= 5">
+        {{ countdown }}
+      </span>
+    </div>
+
   </div>
 
-  <div class="current-problem-container">
-    <span class="current-problem-section">{{ currentProblem?.firstNumber }}</span>
-    <span class="current-problem-section"> + </span>
-    <span class="current-problem-section">{{ currentProblem?.secondNumber }}</span>
-    <span class="current-problem-section"> = </span>
-    <span class="current-problem-section">{{ num }}</span>
-  </div>
 
   <div class="keypad-container">
 
@@ -60,6 +66,17 @@
 
   </div>
 
+  <div class="problem-counter-container" *ngIf="(problemCounter$ | async ) as problemCounter">
+    <div class="problem-counter-item correct">
+      <div class="problem-counter-item-section">correct</div>
+      <div class="problem-counter-item-section">{{ problemCounter?.correct }}</div>
+    </div>
+    <div class="problem-counter-item incorrect">
+      <div class="problem-counter-item-section">incorrect</div>
+      <div class="problem-counter-item-section">{{ problemCounter?.incorrect }}</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- <div *ngIf="previousProblems?.length"
@@ -77,11 +94,13 @@
   </div>
 </div> -->
 
-<div *ngIf="previousProblems?.length"
+<button mat-button (click)="openDialog()" [style.margin-top.px]="20">Open dialog</button>
+
+<!-- <div *ngIf="previousProblems?.length"
   class="previous-problem-container">
   <div *ngFor="let problem of previousProblems"
     class="previous-problem-square"
     [class.correct]="problem?.isCorrectAnswer"
     [class.incorrect]="!problem?.isCorrectAnswer">
   </div>
-</div>
+</div> -->

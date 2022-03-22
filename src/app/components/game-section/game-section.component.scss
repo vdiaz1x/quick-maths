@@ -2,6 +2,13 @@
   display: block;
 }
 
+.top-section-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
 .start-button {
   padding: 5px 60px;
   background: #222;
@@ -20,6 +27,7 @@
 
   &-container {
     font-variant: small-caps;
+    font-size: 24px;
   }
 
   &-label {
@@ -66,8 +74,8 @@
     font-size: 24px;
     display: flex;
     align-items: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    // margin-top: 20px;
+    // margin-bottom: 20px;
   }
 
   &-section {
@@ -142,4 +150,33 @@
       background: #b10000;
     }
   }
+}
+
+.problem-counter {
+
+  &-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-variant: small-caps;
+  }
+
+  &-item {
+    width: 49%;
+    border: 3px solid currentColor;
+    // color: currentColor;
+    padding: 5px 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+}
+
+.correct {
+  color: #006540;
+}
+
+.incorrect {
+  color: #b10000;
 }

@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { BehaviorSubject, timer } from 'rxjs';
-import { takeWhile, tap, finalize, map } from 'rxjs/operators';
+import { Component, ChangeDetectionStrategy, Inject } from '@angular/core';
+import { BehaviorSubject, Observable, timer } from 'rxjs';
+import { takeWhile, tap, finalize, map, reduce } from 'rxjs/operators';
 import { MathProblem } from 'src/app/interfaces/math-problem';
 import { faDeleteLeft, faCircleCheck, faRectangleXmark } from '@fortawesome/free-solid-svg-icons';
+import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-game-section',
@@ -16,7 +17,7 @@ export class GameSectionComponent {
 
   previousProblems: MathProblem[] = [];
 
-  totalTime = 300;
+  totalTime = 30;
 
   num: string = '';
 
@@ -63,7 +64,7 @@ export class GameSectionComponent {
    * subject that notifies when the game is in progress
    */
   gameInProgress$: any = new BehaviorSubject(false)
-    .pipe(tap(t => console.log('in progress?', t)),tap(flag => flag && this.resetGame()));
+    .pipe(tap(flag => flag && this.resetGame()));
 
   /**
    * timer for the game to run, when time runs out then game is over
@@ -74,6 +75,18 @@ export class GameSectionComponent {
       takeWhile((counter) => counter > 0),
       finalize(() => this.gameInProgress$.next(false))
     )
+
+  problemCounter$: Observable<any> = new BehaviorSubject([])
+    .pipe(
+      map((arr) => {
+        return {
+          correct: arr.filter(({isCorrectAnswer}) => isCorrectAnswer).length,
+          incorrect: arr.filter(({isCorrectAnswer}) => !isCorrectAnswer).length,
+        }
+      }),
+    );
+
+  constructor(public dialog: MatDialog) {}
 
   /**
    * generates all the numbers needed to create a math problem
@@ -108,6 +121,8 @@ export class GameSectionComponent {
     this.createCurrentProblem();
     this.num = '';
     this.previousProblems = [];
+    (this.problemCounter$ as BehaviorSubject<any[]>).next([]);
+
   }
 
   /**
@@ -115,12 +130,12 @@ export class GameSectionComponent {
    * pushes current problem into past problems array,
    * wipes model, and creates a new problem
    */
-   nextProblem() {
+  nextProblem() {
     const givenAnswer = +this.num;
     const isCorrectAnswer = givenAnswer === this.currentProblem.answer;
     const currentProblem = {...this.currentProblem, isCorrectAnswer, givenAnswer}
     this.previousProblems.push(currentProblem);
-    console.log(this.previousProblems)
+    (this.problemCounter$ as any).next(this.previousProblems)
 
     this.num = '';
     this.createCurrentProblem();
@@ -134,12 +149,10 @@ export class GameSectionComponent {
   }
 
   type(num: number) {
-    console.log(num)
     this.num = this.num ? this.num + `${num}` : `${num}`
   }
 
   backspace() {
-    // const newnum = this.num
     this.num = this.num.slice(0,this.num.length - 1);
     console.log(this.num)
   }
@@ -148,4 +161,39 @@ export class GameSectionComponent {
     this.num = '';
   }
 
+  openDialog() {
+    this.dialog.open(DialogDataExampleDialog, {
+      data: {
+        animal: 'panda',
+      },
+    });
+  }
+
+}
+
+@Component({
+  selector: 'dialog-data-example-dialog',
+  template: `
+  <h1 mat-dialog-title>Favorite Animal</h1>
+  <div mat-dialog-content>
+    My favorite animal is:
+    <ul>
+      <!-- <li>
+        <span *ngIf="data.animal === 'panda'">&#10003;</span> Panda
+      </li>
+      <li>
+        <span *ngIf="data.animal === 'unicorn'">&#10003;</span> Unicorn
+      </li>
+      <li>
+        <span *ngIf="data.animal === 'lion'">&#10003;</span> Lion
+      </li> -->
+    </ul>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+</div>
+`,
+})
+export class DialogDataExampleDialog {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
 }
